@@ -156,8 +156,8 @@ def get_birthday(birthday, year, today):
     return birth_day
 
 
-def send_message(to_user, access_token, region_name, weather, temp, wind_dir, note_ch, note_en, max_temp, min_temp,
-                 sunrise, sunset, category, pm2p5, proposal, chp):
+def send_message(to_user, access_token, region_name, weather, temp, wind_dir, max_temp, min_temp,
+                 sunrise, sunset, category, pm2p5, chp):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
     
     # 打印调试信息
