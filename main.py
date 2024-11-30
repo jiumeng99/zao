@@ -22,13 +22,24 @@ def get_access_token():
     post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
                 .format(app_id, app_secret))
     try:
-        access_token = get(post_url).json()['access_token']
-    except KeyError:
-        print("获取access_token失败，请检查app_id和app_secret是否正确")
-        os.system("pause")
+        response = get(post_url, timeout=10)
+        print(f"获取access_token响应状态码: {response.status_code}")
+        print(f"响应内容: {response.text}")
+        
+        if response.status_code != 200:
+            print(f"HTTP请求失败，状态码: {response.status_code}")
+            sys.exit(1)
+            
+        result = response.json()
+        if 'access_token' in result:
+            return result['access_token']
+        else:
+            print(f"获取access_token失败，错误信息: {result.get('errmsg', '未知错误')}")
+            sys.exit(1)
+            
+    except Exception as e:
+        print(f"请求发生异常: {str(e)}")
         sys.exit(1)
-    # print(access_token)
-    return access_token
 
 
 def get_weather(region):
@@ -105,7 +116,8 @@ def get_tianhang():
         else:
             chp = ""
     except KeyError:
-        chp = ""
+        print("获取access_token失败，请检查app_id和app_secret是否正确")
+        sys.exit(1)
     return chp
 
 
@@ -284,6 +296,38 @@ if __name__ == "__main__":
     try:
         with open("config.txt", encoding="utf-8") as f:
             config = eval(f.read())
+            
+        # 验证必要的配置项
+        required_keys = ['app_id', 'app_secret', 'template_id', 'user']
+        for key in required_keys:
+            if key not in config:
+                print(f"配置文件缺少必要的配置项: {key}")
+                sys.exit(1)
+                
+        print("当前配置信息:")
+        print(f"app_id: {config['app_id']}")
+        print(f"模板ID: {config['template_id']}")
+        print(f"用户列表: {config['user']}")
+
+        # 获取accessToken
+        accessToken = get_access_token()
+        # 接收的用户
+        users = config["user"]
+        # 传入地区获取天气信息
+        region = config["region"]
+        weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5, proposal = get_weather(region)
+        note_ch = config["note_ch"]
+        note_en = config["note_en"]
+        if note_ch == "" and note_en == "":
+            # 获取词霸每日金句
+            note_ch, note_en = get_ciba()
+        chp = get_tianhang()
+        # 公众号推送消息
+        for user in users:
+            send_message(user, accessToken, region, weather, temp, wind_dir, note_ch, note_en, max_temp, min_temp, sunrise,
+                         sunset, category, pm2p5, proposal, chp)
+        os.system("pause")
+
     except FileNotFoundError:
         print("推送消息失败，请检查config.txt文件是否与程序位于同一路径")
         os.system("pause")
@@ -292,22 +336,3 @@ if __name__ == "__main__":
         print("推送消息失败，请检查配置文件格式是否正确")
         os.system("pause")
         sys.exit(1)
-
-    # 获取accessToken
-    accessToken = get_access_token()
-    # 接收的用户
-    users = config["user"]
-    # 传入地区获取天气信息
-    region = config["region"]
-    weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5, proposal = get_weather(region)
-    note_ch = config["note_ch"]
-    note_en = config["note_en"]
-    if note_ch == "" and note_en == "":
-        # 获取词霸每日金句
-        note_ch, note_en = get_ciba()
-    chp = get_tianhang()
-    # 公众号推送消息
-    for user in users:
-        send_message(user, accessToken, region, weather, temp, wind_dir, note_ch, note_en, max_temp, min_temp, sunrise,
-                     sunset, category, pm2p5, proposal, chp)
-    os.system("pause")
