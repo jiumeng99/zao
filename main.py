@@ -226,12 +226,28 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
                 "value": wind_dir,
                 "color": get_color()
             },
+            "love_day": {
+                "value": love_days,
+                "color": get_color()
+            },
+            "birthday1": {  # 直接在这里添加生日信息
+                "value": birthday_data1,
+                "color": get_color()
+            },
+            "birthday2": {  # 直接在这里添加生日信息
+                "value": birthday_data2,
+                "color": get_color()
+            },
             "note_en": {
                 "value": note_en,
                 "color": get_color()
             },
             "note_ch": {
                 "value": note_ch,
+                "color": get_color()
+            },
+            "rainbow": {  # 彩虹屁改为 rainbow
+                "value": chp,
                 "color": get_color()
             },
             "max_temp": {
@@ -261,25 +277,30 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
             "proposal": {
                 "value": proposal,
                 "color": get_color()
-            },
-            "chp": {
-                "value": chp,
-                "color": get_color()
             }
         }
     }
     
-    # 添加生日数据
+    # 获取生日数据
+    birthdays = {}
+    for k, v in config.items():
+        if k[0:5] == "birth":
+            birthdays[k] = v
+    
+    # 提前计算生日信息
+    birthday_data1 = ""
+    birthday_data2 = ""
     for key, value in birthdays.items():
-        # 获取距离下次生日的时间
         birth_day = get_birthday(value["birthday"], year, today)
         if birth_day == 0:
             birthday_data = "今天{}生日哦，祝{}生日快乐！".format(value["name"], value["name"])
         else:
             birthday_data = "距离{}的生日还有{}天".format(value["name"], birth_day)
-        # 将生日数据插入data
-        data["data"][key] = {"value": birthday_data, "color": get_color()}
-        print(f"添加生日信息到消息 - {key}: {birthday_data}")  # 调试信息
+            
+        if key == "birthday1":
+            birthday_data1 = birthday_data
+        elif key == "birthday2":
+            birthday_data2 = birthday_data
     
     headers = {
         'Content-Type': 'application/json',
