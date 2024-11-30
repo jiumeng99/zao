@@ -317,7 +317,7 @@ if __name__ == "__main__":
         users = config["user"]
         # 传入地区获取天气信息
         region = config["region"]
-        weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5
+        weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5 = get_weather(region)
         chp = get_tianhang()
         # 公众号推送消息
         for user in users:
