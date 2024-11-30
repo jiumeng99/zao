@@ -182,7 +182,7 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     print(f"生日2倒计时: {birth_day2}天")
     
     # 构建完整的日期信息，包含生日和彩虹屁
-    date_info = "{} {}\n\n{}\n{}\n\n{}".format(
+    date_info = "{} {}\n{}".format(
         today, 
         week,
         chp
@@ -292,7 +292,7 @@ if __name__ == "__main__":
         # 公众号推送消息
         for user in users:
             send_message(user, accessToken, region, weather, temp, wind_dir, max_temp, min_temp, sunrise,
-                         sunset, category, pm2p5, birthday1, birthday2, chp)
+                         sunset, category, pm2p5, chp)
         os.system("pause")
 
     except FileNotFoundError:
