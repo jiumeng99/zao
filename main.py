@@ -92,10 +92,7 @@ def get_weather(region):
     id = random.randint(1, 16)
     url = "https://devapi.qweather.com/v7/indices/1d?location={}&key={}&type={}".format(location_id, key, id)
     response = get(url, headers=headers).json()
-    proposal = ""
-    if response["code"] == "200":
-        proposal += response["daily"][0]["text"]
-    return weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5, proposal
+    return weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5
 
 
 def get_tianhang():
@@ -162,7 +159,6 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     
     # 打印调试信息
     print("\n准备发送的消息内容：")
-    print(f"proposal: {proposal}")
     print(f"chp: {chp}")
     
     week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
@@ -250,10 +246,6 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
             "pm2p5": {
                 "value": pm2p5,
                 "color": get_color()
-            },
-            "proposal": {
-                "value": proposal,
-                "color": get_color()
             }
         }
     }
@@ -325,12 +317,12 @@ if __name__ == "__main__":
         users = config["user"]
         # 传入地区获取天气信息
         region = config["region"]
-        weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5, proposal = get_weather(region)
+        weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5
         chp = get_tianhang()
         # 公众号推送消息
         for user in users:
             send_message(user, accessToken, region, weather, temp, wind_dir, max_temp, min_temp, sunrise,
-                         sunset, category, pm2p5, proposal, chp)
+                         sunset, category, pm2p5, chp)
         os.system("pause")
 
     except FileNotFoundError:
