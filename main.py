@@ -174,6 +174,14 @@ def get_ciba():
 def send_message(to_user, access_token, region_name, weather, temp, wind_dir, note_ch, note_en, max_temp, min_temp,
                  sunrise, sunset, category, pm2p5, proposal, chp):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
+    
+    # 打印调试信息
+    print("\n准备发送的消息内容：")
+    print(f"proposal: {proposal}")
+    print(f"chp: {chp}")
+    print(f"note_en: {note_en}")
+    print(f"note_ch: {note_ch}")
+    
     week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
     year = localtime().tm_year
     month = localtime().tm_mon
@@ -192,6 +200,8 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
     for k, v in config.items():
         if k[0:5] == "birth":
             birthdays[k] = v
+            print(f"获取到生日信息 - {k}: {v}")  # 调试信息
+    
     data = {
         "touser": to_user,
         "template_id": config["template_id"],
@@ -216,10 +226,6 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
             },
             "wind_dir": {
                 "value": wind_dir,
-                "color": get_color()
-            },
-            "love_day": {
-                "value": love_days,
                 "color": get_color()
             },
             "note_en": {
@@ -261,10 +267,11 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
             "chp": {
                 "value": chp,
                 "color": get_color()
-            },
-
+            }
         }
     }
+    
+    # 添加生日数据
     for key, value in birthdays.items():
         # 获取距离下次生日的时间
         birth_day = get_birthday(value["birthday"], year, today)
@@ -274,12 +281,19 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
             birthday_data = "距离{}的生日还有{}天".format(value["name"], birth_day)
         # 将生日数据插入data
         data["data"][key] = {"value": birthday_data, "color": get_color()}
+        print(f"添加生日信息到消息 - {key}: {birthday_data}")  # 调试信息
+    
     headers = {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
     }
     response = post(url, headers=headers, json=data).json()
+    
+    # 打印完整的响应
+    print("\n发送消息响应：")
+    print(response)
+    
     if response["errcode"] == 40037:
         print("推送消息失败，请检查模板id是否正确")
     elif response["errcode"] == 40036:
@@ -289,7 +303,7 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, no
     elif response["errcode"] == 0:
         print("推送消息成功")
     else:
-        print(response)
+        print(f"推送消息失败，错误信息: {response}")
 
 
 if __name__ == "__main__":
