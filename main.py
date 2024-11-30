@@ -199,7 +199,15 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
                 birthday_data2 = birthday_data
                 print(f"设置 birthday2 数据: {birthday_data2}")  # 调试信息
     
-    # 构建要发送的数据
+    # 构建完整的日期信息，包含生日和彩虹屁
+    date_info = "{} {}\n\n{}\n{}\n\n{}".format(
+        today, 
+        week,
+        birthday_data1,
+        birthday_data2,
+        chp
+    )
+    
     data = {
         "touser": to_user,
         "template_id": config["template_id"],
@@ -207,7 +215,7 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
         "topcolor": "#FF0000",
         "data": {
             "date": {
-                "value": "{} {}".format(today, week),
+                "value": date_info,  # 使用包含所有信息的日期字符串
                 "color": get_color()
             },
             "region": {
@@ -228,18 +236,6 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
             },
             "love_day": {
                 "value": love_days,
-                "color": get_color()
-            },
-            "birthday1": {
-                "value": birthday_data1,
-                "color": get_color()
-            },
-            "birthday2": {
-                "value": birthday_data2,
-                "color": get_color()
-            },
-            "rainbow": {  # 注意这里用 rainbow 而不是 chp
-                "value": chp,
                 "color": get_color()
             },
             "max_temp": {
