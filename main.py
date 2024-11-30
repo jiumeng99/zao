@@ -7,13 +7,6 @@ import sys
 import os
 
 
-def get_color():
-    # 获取随机颜色
-    get_colors = lambda n: list(map(lambda i: "#" + "%06x" % random.randint(0, 0xFFFFFF), range(n)))
-    color_list = get_colors(100)
-    return random.choice(color_list)
-
-
 def get_access_token():
     # appId
     app_id = config["app_id"]
@@ -215,52 +208,52 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
         "topcolor": "#FF0000",
         "data": {
             "date": {
-                "value": date_info,  # 使用包含所有信息的日期字符串
-                "color": get_color()
+                "value": date_info,
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "region": {
                 "value": region_name,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "weather": {
                 "value": weather,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "temp": {
                 "value": temp,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "wind_dir": {
                 "value": wind_dir,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "love_day": {
                 "value": love_days,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "max_temp": {
                 "value": max_temp,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "min_temp": {
                 "value": min_temp,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "sunrise": {
                 "value": sunrise,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "sunset": {
                 "value": sunset,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "category": {
                 "value": category,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             },
             "pm2p5": {
                 "value": pm2p5,
-                "color": get_color()
+                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
             }
         }
     }
