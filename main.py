@@ -96,17 +96,23 @@ def get_tianhang():
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                           'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
             'Content-type': 'application/x-www-form-urlencoded'
-
         }
-        response = get(url, headers=headers).json()
-        if response["code"] == 200:
-            chp = response["newslist"][0]["content"]
+        response = get(url, headers=headers)
+        print(f"天行API响应状态码: {response.status_code}")
+        print(f"天行API响应内容: {response.text}")
+        
+        result = response.json()
+        if result["code"] == 200:
+            chp = result["newslist"][0]["content"]
+            print(f"获取到的彩虹屁内容: {chp}")
+            return chp
         else:
-            chp = ""
-    except KeyError:
-        print("获取access_token失败，请检查app_id和app_secret是否正确")
-        sys.exit(1)
-    return chp
+            print(f"获取彩虹屁失败，错误码: {result['code']}")
+            return "今天也要开开心心的呀~"
+            
+    except Exception as e:
+        print(f"获取彩虹屁异常: {str(e)}")
+        return "今天也要开开心心的呀~"
 
 
 def get_birthday(birthday, year, today):
@@ -182,10 +188,10 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     print(f"生日2倒计时: {birth_day2}天")
     
     # 构建完整的日期信息，包含生日和彩虹屁
-    date_info = "{} {}\n{}".format(
+    date_info = "{} {}\n\n{}".format(
         today, 
         week,
-        chp
+        chp if chp else "今天也要开开心心的呀~"  # 如果 chp 为空则显示默认消息
     )
     
     data = {
