@@ -194,9 +194,12 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
                 
             if k == "birthday1":
                 birthday_data1 = birthday_data
+                print(f"设置 birthday1 数据: {birthday_data1}")  # 调试信息
             elif k == "birthday2":
                 birthday_data2 = birthday_data
+                print(f"设置 birthday2 数据: {birthday_data2}")  # 调试信息
     
+    # 构建要发送的数据
     data = {
         "touser": to_user,
         "template_id": config["template_id"],
@@ -235,7 +238,7 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
                 "value": birthday_data2,
                 "color": get_color()
             },
-            "rainbow": {
+            "rainbow": {  # 注意这里用 rainbow 而不是 chp
                 "value": chp,
                 "color": get_color()
             },
@@ -265,6 +268,10 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
             }
         }
     }
+    
+    # 打印完整的发送数据
+    print("\n准备发送的完整数据：")
+    print(data)
     
     headers = {
         'Content-Type': 'application/json',
