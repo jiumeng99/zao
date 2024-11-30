@@ -167,6 +167,7 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     day = localtime().tm_mday
     today = datetime.date(datetime(year=year, month=month, day=day))
     week = week_list[today.isoweekday() % 7]
+    
     # 获取在一起的日子的日期格式
     love_year = int(config["love_date"].split("-")[0])
     love_month = int(config["love_date"].split("-")[1])
@@ -174,12 +175,27 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     love_date = date(love_year, love_month, love_day)
     # 获取在一起的日期差
     love_days = str(today.__sub__(love_date)).split(" ")[0]
-    # 获取所有生日数据
+    
+    # 获取生日数据并提前计算
     birthdays = {}
+    birthday_data1 = ""
+    birthday_data2 = ""
+    
     for k, v in config.items():
         if k[0:5] == "birth":
             birthdays[k] = v
             print(f"获取到生日信息 - {k}: {v}")  # 调试信息
+            
+            birth_day = get_birthday(v["birthday"], year, today)
+            if birth_day == 0:
+                birthday_data = "今天{}生日哦，祝{}生日快乐！".format(v["name"], v["name"])
+            else:
+                birthday_data = "距离{}的生日还有{}天".format(v["name"], birth_day)
+                
+            if k == "birthday1":
+                birthday_data1 = birthday_data
+            elif k == "birthday2":
+                birthday_data2 = birthday_data
     
     data = {
         "touser": to_user,
@@ -211,15 +227,15 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
                 "value": love_days,
                 "color": get_color()
             },
-            "birthday1": {  # 直接在这里添加生日信息
+            "birthday1": {
                 "value": birthday_data1,
                 "color": get_color()
             },
-            "birthday2": {  # 直接在这里添加生日信息
+            "birthday2": {
                 "value": birthday_data2,
                 "color": get_color()
             },
-            "rainbow": {  # 彩虹屁改为 rainbow
+            "rainbow": {
                 "value": chp,
                 "color": get_color()
             },
@@ -250,27 +266,6 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
         }
     }
     
-    # 获取生日数据
-    birthdays = {}
-    for k, v in config.items():
-        if k[0:5] == "birth":
-            birthdays[k] = v
-    
-    # 提前计算生日信息
-    birthday_data1 = ""
-    birthday_data2 = ""
-    for key, value in birthdays.items():
-        birth_day = get_birthday(value["birthday"], year, today)
-        if birth_day == 0:
-            birthday_data = "今天{}生日哦，祝{}生日快乐！".format(value["name"], value["name"])
-        else:
-            birthday_data = "距离{}的生日还有{}天".format(value["name"], birth_day)
-            
-        if key == "birthday1":
-            birthday_data1 = birthday_data
-        elif key == "birthday2":
-            birthday_data2 = birthday_data
-    
     headers = {
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -278,7 +273,6 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     }
     response = post(url, headers=headers, json=data).json()
     
-    # 打印完整的响应
     print("\n发送消息响应：")
     print(response)
     
