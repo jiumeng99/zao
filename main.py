@@ -164,8 +164,6 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     print("\n准备发送的消息内容：")
     print(f"proposal: {proposal}")
     print(f"chp: {chp}")
-    print(f"note_en: {note_en}")
-    print(f"note_ch: {note_ch}")
     
     week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
     year = localtime().tm_year
@@ -223,14 +221,6 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
             },
             "birthday2": {  # 直接在这里添加生日信息
                 "value": birthday_data2,
-                "color": get_color()
-            },
-            "note_en": {
-                "value": note_en,
-                "color": get_color()
-            },
-            "note_ch": {
-                "value": note_ch,
                 "color": get_color()
             },
             "rainbow": {  # 彩虹屁改为 rainbow
@@ -339,7 +329,7 @@ if __name__ == "__main__":
         chp = get_tianhang()
         # 公众号推送消息
         for user in users:
-            send_message(user, accessToken, region, weather, temp, wind_dir, note_ch, note_en, max_temp, min_temp, sunrise,
+            send_message(user, accessToken, region, weather, temp, wind_dir, max_temp, min_temp, sunrise,
                          sunset, category, pm2p5, proposal, chp)
         os.system("pause")
 
