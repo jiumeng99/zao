@@ -16,22 +16,16 @@ def get_access_token():
                 .format(app_id, app_secret))
     try:
         response = get(post_url, timeout=10)
-        print(f"获取access_token响应状态码: {response.status_code}")
-        print(f"响应内容: {response.text}")
-        
         if response.status_code != 200:
-            print(f"HTTP请求失败，状态码: {response.status_code}")
             sys.exit(1)
             
         result = response.json()
         if 'access_token' in result:
             return result['access_token']
         else:
-            print(f"获取access_token失败，错误信息: {result.get('errmsg', '未知错误')}")
             sys.exit(1)
             
     except Exception as e:
-        print(f"请求发生异常: {str(e)}")
         sys.exit(1)
 
 
@@ -88,33 +82,6 @@ def get_weather(region):
     return weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5
 
 
-def get_tianhang():
-    try:
-        key = config["tian_api"]
-        url = "http://api.tianapi.com/caihongpi/index?key={}".format(key)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                          'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
-            'Content-type': 'application/x-www-form-urlencoded'
-        }
-        response = get(url, headers=headers)
-        print(f"天行API响应状态码: {response.status_code}")
-        print(f"天行API响应内容: {response.text}")
-        
-        result = response.json()
-        if result["code"] == 200:
-            chp = result["newslist"][0]["content"]
-            print(f"获取到的彩虹屁内容: {chp}")
-            return chp
-        else:
-            print(f"获取彩虹屁失败，错误码: {result['code']}")
-            return "今天也要开开心心的呀~"
-            
-    except Exception as e:
-        print(f"获取彩虹屁异常: {str(e)}")
-        return "今天也要开开心心的呀~"
-
-
 def get_birthday(birthday, year, today):
     birthday_year = birthday[0]  # 获取第一个字符，判断是否为 'r'
     # 判断是否为农历生日
@@ -152,12 +119,8 @@ def get_birthday(birthday, year, today):
 
 
 def send_message(to_user, access_token, region_name, weather, temp, wind_dir, max_temp, min_temp,
-                 sunrise, sunset, category, pm2p5, chp):
+                 sunrise, sunset, category, pm2p5):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
-    
-    # 打印调试信息
-    print("\n准备发送的消息内容：")
-    print(f"chp: {chp}")
     
     week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
     year = localtime().tm_year
@@ -175,78 +138,33 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     love_days = str(today.__sub__(love_date)).split(" ")[0]
     
     # 获取生日数据并提前计算
-    birthday_data1 = ""
-    birthday_data2 = ""
-    
-    # 计算第一个生日
     birth_day1 = get_birthday(config["birthday1"], year, today)
-    
-    # 计算第二个生日
     birth_day2 = get_birthday(config["birthday2"], year, today)
     
-    print(f"生日1倒计时: {birth_day1}天")
-    print(f"生日2倒计时: {birth_day2}天")
-    
-    # 构建完整的日期信息，包含生日和彩虹屁
-    date_info = "{} {}\n\n{}".format(
-        today, 
-        week,
-        chp if chp else "今天也要开开心心的呀~"  # 如果 chp 为空则显示默认消息
-    )
+    # 构建完整的日期信息
+    date_info = "{} {}".format(today, week)
     
     data = {
         "touser": to_user,
         "template_id": config["template_id"],
         "url": "http://weixin.qq.com/download",
         "data": {
-            "date": {
-                "value": date_info
-            },
-            "region": {
-                "value": region_name
-            },
-            "weather": {
-                "value": weather
-            },
-            "temp": {
-                "value": temp
-            },
-            "wind_dir": {
-                "value": wind_dir
-            },
-            "love_day": {
-                "value": love_days
-            },
-            "max_temp": {
-                "value": max_temp
-            },
-            "min_temp": {
-                "value": min_temp
-            },
-            "sunrise": {
-                "value": sunrise
-            },
-            "sunset": {
-                "value": sunset
-            },
-            "category": {
-                "value": category
-            },
-            "birthday1": {
-                "value": birth_day1
-            },
-            "birthday2": {
-                "value": birth_day2
-            },
-            "pm2p5": {
-                "value": pm2p5
-            }
+            "date": {"value": date_info},
+            "region": {"value": region_name},
+            "weather": {"value": weather},
+            "temp": {"value": temp},
+            "wind_dir": {"value": wind_dir},
+            "love_day": {"value": love_days},
+            "max_temp": {"value": max_temp},
+            "min_temp": {"value": min_temp},
+            "sunrise": {"value": sunrise},
+            "sunset": {"value": sunset},
+            "category": {"value": category},
+            "birthday1": {"value": birth_day1},
+            "birthday2": {"value": birth_day2},
+            "pm2p5": {"value": pm2p5}
         }
     }
-    
-    # 打印完整的发送数据
-    print("\n准备发送的完整数据：")
-    print(data)
     
     headers = {
         'Content-Type': 'application/json',
@@ -255,19 +173,8 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     }
     response = post(url, headers=headers, json=data).json()
     
-    print("\n发送消息响应：")
-    print(response)
-    
-    if response["errcode"] == 40037:
-        print("推送消息失败，请检查模板id是否正确")
-    elif response["errcode"] == 40036:
-        print("推送消息失败，请检查模板id是否为空")
-    elif response["errcode"] == 40003:
-        print("推送消息失败，请检查微信号是否正确")
-    elif response["errcode"] == 0:
-        print("推送消息成功")
-    else:
-        print(f"推送消息失败，错误信息: {response}")
+    if response["errcode"] != 0:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -279,13 +186,7 @@ if __name__ == "__main__":
         required_keys = ['app_id', 'app_secret', 'template_id', 'user']
         for key in required_keys:
             if key not in config:
-                print(f"配置文件缺少必要的配置项: {key}")
                 sys.exit(1)
-                
-        print("当前配置信息:")
-        print(f"app_id: {config['app_id']}")
-        print(f"模板ID: {config['template_id']}")
-        print(f"用户列表: {config['user']}")
 
         # 获取accessToken
         accessToken = get_access_token()
@@ -294,18 +195,10 @@ if __name__ == "__main__":
         # 传入地区获取天气信息
         region = config["region"]
         weather, temp, max_temp, min_temp, wind_dir, sunrise, sunset, category, pm2p5 = get_weather(region)
-        chp = get_tianhang()
         # 公众号推送消息
         for user in users:
             send_message(user, accessToken, region, weather, temp, wind_dir, max_temp, min_temp, sunrise,
-                         sunset, category, pm2p5, chp)
-        os.system("pause")
+                         sunset, category, pm2p5)
 
-    except FileNotFoundError:
-        print("推送消息失败，请检查config.txt文件是否与程序位于同一路径")
-        os.system("pause")
-        sys.exit(1)
-    except SyntaxError:
-        print("推送消息失败，请检查配置文件格式是否正确")
-        os.system("pause")
+    except (FileNotFoundError, SyntaxError):
         sys.exit(1)
