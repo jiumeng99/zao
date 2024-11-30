@@ -110,9 +110,9 @@ def get_tianhang():
 
 
 def get_birthday(birthday, year, today):
-    birthday_year = birthday.split("-")[0]
+    birthday_year = birthday[0]  # 获取第一个字符，判断是否为 'r'
     # 判断是否为农历生日
-    if birthday_year[0] == "r":
+    if birthday_year == "r":
         r_mouth = int(birthday.split("-")[1])
         r_day = int(birthday.split("-")[2])
         # 获取农历生日的生日
@@ -120,18 +120,17 @@ def get_birthday(birthday, year, today):
             year_date = ZhDate(year, r_mouth, r_day).to_datetime().date()
         except TypeError:
             print("请检查生日的日子是否在今年存在")
-            os.system("pause")
             sys.exit(1)
-
     else:
         # 获取国历生日的今年对应月和日
         birthday_month = int(birthday.split("-")[1])
         birthday_day = int(birthday.split("-")[2])
         # 今年生日
         year_date = date(year, birthday_month, birthday_day)
+        
     # 计算生日年份，如果还没过，按当年减，如果过了需要+1
     if today > year_date:
-        if birthday_year[0] == "r":
+        if birthday_year == "r":
             # 获取农历明年生日的月和日
             r_last_birthday = ZhDate((year + 1), r_mouth, r_day).to_datetime().date()
             birth_date = date((year + 1), r_last_birthday.month, r_last_birthday.day)
@@ -170,34 +169,22 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
     love_days = str(today.__sub__(love_date)).split(" ")[0]
     
     # 获取生日数据并提前计算
-    birthdays = {}
     birthday_data1 = ""
     birthday_data2 = ""
     
-    for k, v in config.items():
-        if k[0:5] == "birth":
-            birthdays[k] = v
-            print(f"获取到生日信息 - {k}: {v}")  # 调试信息
-            
-            birth_day = get_birthday(v["birthday"], year, today)
-            if birth_day == 0:
-                birthday_data = "今天{}生日哦，祝{}生日快乐！".format(v["name"], v["name"])
-            else:
-                birthday_data = "距离{}的生日还有{}天".format(v["name"], birth_day)
-                
-            if k == "birthday1":
-                birthday_data1 = birthday_data
-                print(f"设置 birthday1 数据: {birthday_data1}")  # 调试信息
-            elif k == "birthday2":
-                birthday_data2 = birthday_data
-                print(f"设置 birthday2 数据: {birthday_data2}")  # 调试信息
+    # 计算第一个生日
+    birth_day1 = get_birthday(config["birthday1"], year, today)
+    
+    # 计算第二个生日
+    birth_day2 = get_birthday(config["birthday2"], year, today)
+    
+    print(f"生日1倒计时: {birth_day1}天")
+    print(f"生日2倒计时: {birth_day2}天")
     
     # 构建完整的日期信息，包含生日和彩虹屁
     date_info = "{} {}\n\n{}\n{}\n\n{}".format(
         today, 
         week,
-        birthday_data1,
-        birthday_data2,
         chp
     )
     
@@ -205,55 +192,48 @@ def send_message(to_user, access_token, region_name, weather, temp, wind_dir, ma
         "touser": to_user,
         "template_id": config["template_id"],
         "url": "http://weixin.qq.com/download",
-        "topcolor": "#FF0000",
         "data": {
             "date": {
-                "value": date_info,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": date_info
             },
             "region": {
-                "value": region_name,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": region_name
             },
             "weather": {
-                "value": weather,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": weather
             },
             "temp": {
-                "value": temp,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": temp
             },
             "wind_dir": {
-                "value": wind_dir,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": wind_dir
             },
             "love_day": {
-                "value": love_days,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": love_days
             },
             "max_temp": {
-                "value": max_temp,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": max_temp
             },
             "min_temp": {
-                "value": min_temp,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": min_temp
             },
             "sunrise": {
-                "value": sunrise,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": sunrise
             },
             "sunset": {
-                "value": sunset,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": sunset
             },
             "category": {
-                "value": category,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": category
+            },
+            "birthday1": {
+                "value": birth_day1
+            },
+            "birthday2": {
+                "value": birth_day2
             },
             "pm2p5": {
-                "value": pm2p5,
-                "color": "#" + "%06x" % random.randint(0, 0xFFFFFF)
+                "value": pm2p5
             }
         }
     }
@@ -312,7 +292,7 @@ if __name__ == "__main__":
         # 公众号推送消息
         for user in users:
             send_message(user, accessToken, region, weather, temp, wind_dir, max_temp, min_temp, sunrise,
-                         sunset, category, pm2p5, chp)
+                         sunset, category, pm2p5, birthday1, birthday2, chp)
         os.system("pause")
 
     except FileNotFoundError:
